@@ -33,6 +33,21 @@ def grabListsFromSheet(sheet):
 	return persons, prefs
 
 '''
+
+'''
+def completePersons(bigs, littles, bigsPreferences, littlesPreferences):
+	cnt = 0
+	while len(bigs) < len(littles):
+		bigs.append(bigs[cnt] + '*')
+		bigsPreferences[bigs[cnt] + '*'] = bigsPreferences[bigs[cnt]]
+		cnt += 1
+	while len(littles) < len(bigs):
+		littles.append(littles[cnt] + '*')
+		littlesPreferences[littles[cnt] + '*'] = littlesPreferences[littles[cnt]]
+		cnt += 1
+	return bigs, littles, bigsPreferences, littlesPreferences
+
+'''
 Fill in preferences with the rest of potential candidates
 A person is likely indifferent about these filled-in candidates as they were explicitly specificied in their preferences
 '''
@@ -50,6 +65,7 @@ def initializeLists():
 	wb = load_workbook('biglittlepreferences.xlsx')
 	bigs, bigsPreferences = grabListsFromSheet(wb.worksheets[0])
 	littles, littlesPreferences = grabListsFromSheet(wb.worksheets[1])
+	bigs, littles, bigsPreferences, littlesPreferences = completePersons(bigs, littles, bigsPreferences, littlesPreferences)
 	bigsPreferences = completePreferences(bigsPreferences, littles)
 	littlesPreferences = completePreferences(littlesPreferences, bigs)
 	return bigs, littles, bigsPreferences, littlesPreferences
