@@ -1,3 +1,46 @@
+from openpyxl import load_workbook
+
+def getCellName(row, col):
+	alpha = ''
+	while col > 0:
+		d = int(col % 26)
+		if d == 0:
+			d = 26
+		col -= d
+		alpha = str(chr(65+d-1)) + alpha
+		col = col / 26
+	return alpha + str(row)
+
+def grabListsFromSheet(sheet):
+	persons = []
+	prefs = {}
+	row = 1
+	while sheet[getCellName(row, 1)].value != None:
+		person = sheet[getCellName(row, 1)].value
+		persons.append(person)
+		prefs[person] = []
+		col = 2
+		while sheet[getCellName(row, col)].value != None:
+			prefs[person].append(sheet[getCellName(row, col)].value)
+			col += 1
+		row += 1
+	return persons, prefs
+
+def completePreferences(prefs, prefValues):
+	for person in prefs:
+		for prefValue in prefValues:
+			if prefValue not in prefs[person]:
+				prefs[person].append(prefValue)
+	return prefs
+
+def initializeLists():
+	wb = load_workbook('biglittlepreferences.xlsx')
+	bigs, bigsPreferences = grabListsFromSheet(wb.worksheets[0])
+	littles, littlesPreferences = grabListsFromSheet(wb.worksheets[1])
+	bigsPreferences = completePreferences(bigsPreferences, littles)
+	littlesPreferences = completePreferences(littlesPreferences, bigs)
+	return bigs, littles, bigsPreferences, littlesPreferences
+
 '''
 Initializes dictionaries with the list as the keys and boolean Falses as the values
 '''
@@ -63,22 +106,7 @@ def pairBigLittles(bigs, littles, bigsPreferences, littlesPreferences):
 	return pairs
 
 def main():
-	bigs = ['Big 1', 'Big 2', 'Big 3', 'Big 4', 'Big 5']
-	littles = ['Little 1' ,'Little 2', 'Little 3', 'Little 4', 'Little 5']
-	littlesPreferences = {
-		'Little 1': ['Big 2', 'Big 3', 'Big 1', 'Big 4', 'Big 5'],
-		'Little 2': ['Big 1', 'Big 2', 'Big 4', 'Big 3', 'Big 5'],
-		'Little 3': ['Big 3', 'Big 1', 'Big 4', 'Big 2', 'Big 5'],
-		'Little 4': ['Big 5', 'Big 1', 'Big 4', 'Big 2', 'Big 3'],
-		'Little 5': ['Big 3', 'Big 5', 'Big 2', 'Big 1', 'Big 4']
-	}
-	bigsPreferences = {
-		'Big 1': ['Little 2', 'Little 3', 'Little 5', 'Little 1', 'Little 4'],
-		'Big 2': ['Little 3', 'Little 5', 'Little 4', 'Little 1', 'Little 2'],
-		'Big 3': ['Little 1', 'Little 2', 'Little 4', 'Little 3', 'Little 5'],
-		'Big 4': ['Little 3', 'Little 2', 'Little 4', 'Little 1', 'Little 5'],
-		'Big 5': ['Little 1', 'Little 4', 'Little 2', 'Little 3', 'Little 5']
-	}
+	bigs, littles, bigsPreferences, littlesPreferences = initializeLists()
 	pairs = pairBigLittles(bigs, littles, bigsPreferences, littlesPreferences)
 	print(pairs)
 main()
