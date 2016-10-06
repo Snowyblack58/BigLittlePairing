@@ -117,7 +117,8 @@ Print the pairs into the same workbook
 def printPairsToWorkbook(pairs):
 	wb = load_workbook('biglittlepreferences.xlsx')
 	if len(wb.worksheets) > 2:
-		sheet = wb.worksheets[2]
+		wb.remove_sheet(wb.worksheets[2])
+		sheet = wb.create_sheet()
 	else:
 		sheet = wb.create_sheet()
 	sheet.title = 'Pairs'
