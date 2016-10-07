@@ -1,5 +1,3 @@
-from openpyxl import load_workbook
-
 '''
 Convert a row/col coordinate to an excel 'D5' cell location
 '''
@@ -33,6 +31,24 @@ def grabListsFromSheet(sheet):
 	return persons, prefs
 
 '''
+Parse persons and their preferences off of one .csv file
+'''
+def grabListsFromCSV(filepath):
+	import csv
+	csvfile = open(filepath, 'r')
+	reader = csv.reader(csvfile)
+	persons = []
+	prefs = {}
+	cnt = 1
+	for row in reader:
+		if cnt == 1:
+			cnt += 1
+			continue
+		persons.append(row[1])
+		prefs[row[1]] = row[2:]
+	return persons, prefs
+
+'''
 Duplicate people to ensure there are an equal number of bigs and littles
 '''
 def completePersons(bigs, littles, bigsPreferences, littlesPreferences):
@@ -61,10 +77,15 @@ def completePreferences(prefs, prefValues):
 '''
 Create lists of bigs and littles and dictionaries for their respective preferences
 '''
-def initializeLists():
-	wb = load_workbook('biglittlepreferences.xlsx') 
-	bigs, bigsPreferences = grabListsFromSheet(wb.worksheets[0])
-	littles, littlesPreferences = grabListsFromSheet(wb.worksheets[1])
+def initializeLists(filetype):
+	if filetype == 'xlsx':
+		from openpyxl import load_workbook
+		wb = load_workbook('biglittlepreferences.xlsx')
+		bigs, bigsPreferences = grabListsFromSheet(wb.worksheets[0])
+		littles, littlesPreferences = grabListsFromSheet(wb.worksheets[1])
+	elif filetype == 'csv':
+		bigs, bigsPreferences = grabListsFromCSV('bigs.csv')
+		littles, littlesPreferences = grabListsFromCSV('littles.csv')
 	bigs, littles, bigsPreferences, littlesPreferences = completePersons(bigs, littles, bigsPreferences, littlesPreferences)
 	bigsPreferences = completePreferences(bigsPreferences, littles)
 	littlesPreferences = completePreferences(littlesPreferences, bigs)
@@ -131,12 +152,9 @@ def pairBigLittles(bigs, littles, bigsPreferences, littlesPreferences):
 Print the pairs into the same workbook
 '''
 def printPairsToWorkbook(pairs):
-	wb = load_workbook('biglittlepreferences.xlsx')
-	if len(wb.worksheets) > 2:
-		wb.remove_sheet(wb.worksheets[2])
-		sheet = wb.create_sheet()
-	else:
-		sheet = wb.create_sheet()
+	from openpyxl import Workbook
+	wb = Workbook()
+	sheet = wb.active
 	sheet.title = 'Pairs'
 	sheet['A1'] = 'Bigs'
 	sheet['B1'] = 'Littles'
@@ -145,10 +163,10 @@ def printPairsToWorkbook(pairs):
 		sheet.cell(row=row, column=1).value = pair[0]
 		sheet.cell(row=row, column=2).value = pair[1]
 		row += 1
-	wb.save('biglittlepreferences.xlsx')
+	wb.save('pairs.xlsx')
 
 def main():
-	bigs, littles, bigsPreferences, littlesPreferences = initializeLists()
+	bigs, littles, bigsPreferences, littlesPreferences = initializeLists('csv')
 	pairs = pairBigLittles(bigs, littles, bigsPreferences, littlesPreferences)
 	printPairsToWorkbook(pairs)
 main()
