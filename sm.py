@@ -20,12 +20,12 @@ Parse persons and their preferences off of one Excel worksheet
 def grabListsFromSheet(sheet):
 	persons = []
 	prefs = {}
-	row = 1
-	while sheet.cell(row=row, column=1).value != None:
-		person = sheet.cell(row=row, column=1).value
+	row = 2
+	while sheet.cell(row=row, column=2).value != None:
+		person = sheet.cell(row=row, column=2).value
 		persons.append(person)
 		prefs[person] = []
-		col = 2
+		col = 3
 		while sheet.cell(row=row, column=col).value != None:
 			prefs[person].append(sheet.cell(row=row, column=col).value)
 			col += 1
@@ -33,7 +33,7 @@ def grabListsFromSheet(sheet):
 	return persons, prefs
 
 '''
-
+Duplicate people to ensure there are an equal number of bigs and littles
 '''
 def completePersons(bigs, littles, bigsPreferences, littlesPreferences):
 	cnt = 0
@@ -62,7 +62,7 @@ def completePreferences(prefs, prefValues):
 Create lists of bigs and littles and dictionaries for their respective preferences
 '''
 def initializeLists():
-	wb = load_workbook('biglittlepreferences.xlsx')
+	wb = load_workbook('biglittlepreferences.xlsx') 
 	bigs, bigsPreferences = grabListsFromSheet(wb.worksheets[0])
 	littles, littlesPreferences = grabListsFromSheet(wb.worksheets[1])
 	bigs, littles, bigsPreferences, littlesPreferences = completePersons(bigs, littles, bigsPreferences, littlesPreferences)
