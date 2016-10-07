@@ -1,4 +1,19 @@
 '''
+Get file paths from filepaths.txt
+'''
+def getFilePaths():
+	infile = open('paths.txt','r')
+	bigsfilepath = ''
+	littlesfilepath = ''
+	for row in infile:
+		if bigsfilepath == '':
+			bigsfilepath = row.strip()[row.strip().index('=')+1:]
+		else:
+			littlesfilepath = row.strip()[row.strip().index('=')+1:]
+			break
+	return bigsfilepath, littlesfilepath
+
+'''
 Convert a row/col coordinate to an excel 'D5' cell location
 '''
 def getCellName(row, col):
@@ -47,7 +62,10 @@ def grabListsFromCSV(filepath):
 			cnt += 1
 			continue
 		persons.append(row[1])
-		prefs[row[1]] = row[2:]
+		if '' in row:
+			prefs[row[1]] = row[2:row.index('')]
+		else:
+			prefs[row[1]] = row[2:]
 	return persons, prefs
 
 '''
@@ -57,11 +75,11 @@ def completePersons(bigs, littles, bigsPreferences, littlesPreferences):
 	cnt = 0
 	while len(bigs) < len(littles):
 		bigs.append(bigs[cnt] + '*')
-		bigsPreferences[bigs[cnt] + '*'] = bigsPreferences[bigs[cnt]]
+		bigsPreferences[bigs[cnt] + '*'] = bigsPreferences[bigs[cnt]][:]
 		cnt += 1
 	while len(littles) < len(bigs):
 		littles.append(littles[cnt] + '*')
-		littlesPreferences[littles[cnt] + '*'] = littlesPreferences[littles[cnt]]
+		littlesPreferences[littles[cnt] + '*'] = littlesPreferences[littles[cnt]][:]
 		cnt += 1
 	return bigs, littles, bigsPreferences, littlesPreferences
 
@@ -168,7 +186,11 @@ def printPairsToWorkbook(pairs):
 	wb.save('pairs.xlsx')
 
 def main():
-	bigs, littles, bigsPreferences, littlesPreferences = initializeLists('bigs.xlsx','littles.csv')
+	bigsfilepath, littlesfilepath = getFilePaths()
+	bigs, littles, bigsPreferences, littlesPreferences = initializeLists(bigsfilepath, littlesfilepath)
+	# print(bigs)
+	# print(bigsPreferences)
+	# print(littlesPreferences)
 	pairs = pairBigLittles(bigs, littles, bigsPreferences, littlesPreferences)
 	printPairsToWorkbook(pairs)
 main()
