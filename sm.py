@@ -15,7 +15,9 @@ def getCellName(row, col):
 '''
 Parse persons and their preferences off of one Excel worksheet
 '''
-def grabListsFromSheet(sheet):
+def grabListsFromSheet(filepath):
+	from openpyxl import load_workbook
+	sheet = load_workbook(filepath).active
 	persons = []
 	prefs = {}
 	row = 2
@@ -77,15 +79,15 @@ def completePreferences(prefs, prefValues):
 '''
 Create lists of bigs and littles and dictionaries for their respective preferences
 '''
-def initializeLists(filetype):
-	if filetype == 'xlsx':
-		from openpyxl import load_workbook
-		wb = load_workbook('biglittlepreferences.xlsx')
-		bigs, bigsPreferences = grabListsFromSheet(wb.worksheets[0])
-		littles, littlesPreferences = grabListsFromSheet(wb.worksheets[1])
-	elif filetype == 'csv':
-		bigs, bigsPreferences = grabListsFromCSV('bigs.csv')
-		littles, littlesPreferences = grabListsFromCSV('littles.csv')
+def initializeLists(bigsPath, littlesPath):
+	if bigsPath[bigsPath.rfind('.'):] == '.xlsx':
+		bigs, bigsPreferences = grabListsFromSheet(bigsPath)
+	elif bigsPath[bigsPath.rfind('.'):] == '.csv':
+		bigs, bigsPreferences = grabListsFromCSV(bigsPath)
+	if littlesPath[littlesPath.rfind('.'):] == '.xlsx':
+		littles, littlesPreferences = grabListsFromSheet(littlesPath)
+	elif littlesPath[littlesPath.rfind('.'):] == '.csv':
+		littles, littlesPreferences = grabListsFromCSV(littlesPath)
 	bigs, littles, bigsPreferences, littlesPreferences = completePersons(bigs, littles, bigsPreferences, littlesPreferences)
 	bigsPreferences = completePreferences(bigsPreferences, littles)
 	littlesPreferences = completePreferences(littlesPreferences, bigs)
@@ -166,7 +168,7 @@ def printPairsToWorkbook(pairs):
 	wb.save('pairs.xlsx')
 
 def main():
-	bigs, littles, bigsPreferences, littlesPreferences = initializeLists('csv')
+	bigs, littles, bigsPreferences, littlesPreferences = initializeLists('bigs.xlsx','littles.csv')
 	pairs = pairBigLittles(bigs, littles, bigsPreferences, littlesPreferences)
 	printPairsToWorkbook(pairs)
 main()
